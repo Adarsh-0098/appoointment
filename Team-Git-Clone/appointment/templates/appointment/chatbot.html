@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gemini Healthcare Chatbot</title>
+</head>
+<body>
+    <h1>Welcome to Gemini Healthcare Chatbot</h1>
+    <form id="chatbotForm">
+        <input type="text" id="message" placeholder="Describe your symptoms..." required>
+        <button type="submit">Send</button>
+    </form>
+    <div id="response"></div>
+
+    <script>
+        const form = document.getElementById('chatbotForm');
+        const messageInput = document.getElementById('message');
+        const responseDiv = document.getElementById('response');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const symptoms = messageInput.value;
+
+            fetch('/appointment/chatbot/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    'symptoms': symptoms,
+                    'name': 'John Doe'  
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                responseDiv.innerHTML = data.message;
+                if (data.doctors) {
+                    const doctorsList = data.doctors.map(doctor => `<p>Dr. ${doctor.name} - ${doctor.specialty} (Available: ${doctor.availability})</p>`).join('');
+                    responseDiv.innerHTML += doctorsList;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
